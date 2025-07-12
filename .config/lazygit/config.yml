@@ -1,0 +1,111 @@
+# Lazygit Best Practices Configuration
+
+gui:
+  # Theme settings
+  theme:
+    activeBorderColor:
+      - cyan
+      - bold
+    inactiveBorderColor:
+      - white
+    selectedLineBgColor:
+      - "#2D3A5D"
+    unstagedChangesColor:
+      - red
+    optionsTextColor:
+      - blue
+    cherryPickedCommitBgColor:
+      - yellow
+    cherryPickedCommitFgColor:
+      - blue
+  
+  # View optimizations
+  showFileTree: true
+  showCommandLog: true
+  showIcons: false
+  expandFocusedSidePanel: true
+  mainPanelSplitMode: "flexible"
+  
+  # Layout optimizations
+  sidePanelWidth: 0.3
+  commandLogSize: 8
+  
+git:
+  # Git behavior optimizations
+  autoFetch: true
+  autoRefresh: true
+  parseEmoji: true
+  
+  # Push/pull behavior
+  pull:
+    mode: "rebase"
+  push:
+    autoSetupRemote: true
+    
+  # Diff viewing optimizations
+  paging:
+    colorArg: always
+    pager: "delta --dark --paging=never"
+    
+  # Conventional commit template in ~/.gitmessage
+  commit:
+    signOff: false
+
+# Custom commands
+customCommands:
+  - key: "W"
+    command: "git add . && git commit -m 'chore: WIP - {{.Form.message}}'"
+    context: "files"
+    description: "Add all changes as WIP commit"
+    prompts:
+      - type: "input"
+        title: "WIP Description"
+        key: "message"
+  
+  - key: "F"
+    command: "git commit --amend --no-edit"
+    context: "files"
+    description: "Fix last commit (keep message)"
+    
+  - key: "C"
+    command: "git clean -fd"
+    context: "files"
+    description: "Clean untracked files/directories"
+    loadingText: "Cleaning..."
+
+  # Enhanced Squash commands
+  - key: "S"
+    command: "git reset --soft HEAD~{{.Form.count}} && git commit --edit -m \"$(git log --format=%B --reverse HEAD..HEAD@{1})\""
+    context: "commits"
+    description: "Squash last N commits"
+    prompts:
+      - type: "input"
+        title: "Number of commits to squash"
+        key: "count"
+        initialValue: "2"
+  
+  # Squash from current HEAD to selected commit
+  - key: "T"
+    command: "git reset --soft {{.SelectedLocalCommit.Sha}} && git commit --edit -m \"$(git log --format=%B --reverse {{.SelectedLocalCommit.Sha}}..HEAD@{1})\""
+    context: "commits"
+    description: "Squash HEAD to selected commit"
+    loadingText: "Squashing commits..."
+        
+  # Edit commit message command
+  - key: "E"
+    command: "git rebase --interactive {{.SelectedLocalCommit.ParentSha}}"
+    context: "commits"
+    description: "Edit selected commit message"
+    loadingText: "Opening interactive rebase..."
+
+# Update settings
+update:
+  method: prompt
+  days: 14
+
+# Other optimizations
+confirmOnQuit: false
+quitOnTopLevelReturn: true
+refresher:
+  refreshInterval: 3
+  fetchInterval: 60

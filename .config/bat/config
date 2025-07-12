@@ -1,0 +1,11 @@
+--theme="TwoDark"
+--style="header,numbers,grid,changes"
+--paging=auto
+--tabs=4
+--wrap=auto
+--color=auto
+--map-syntax "*.conf:INI"
+--map-syntax ".gitconfig:INI"
+--map-syntax "*.prop:Java Properties"
+--map-syntax "*.properties:Java Properties"
+--italic-text=always

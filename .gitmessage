@@ -1,0 +1,19 @@
+# type(scope): short description (max 50 chars)
+# |<---- Using a maximum of 50 characters ---->|
+
+# Detailed description (optional)
+# |<---- Try to limit each line to 72 characters ---->|
+
+# - feat: A new feature
+# - fix: A bug fix
+# - docs: Documentation only changes
+# - style: Changes that don't affect code functionality
+# - refactor: Code change (no features/fixes)
+# - perf: Performance improvement
+# - test: Adding or updating tests
+# - build: Build system or dependency changes
+# - ci: CI configuration changes
+# - chore: Maintenance tasks
+
+# Issues (optional)
+# Fixes: #123
