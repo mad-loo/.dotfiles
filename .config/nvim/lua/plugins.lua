@@ -31,7 +31,84 @@ require("lazy").setup({
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function()
-      require('lualine').setup()
+      -- Light theme-friendly color scheme
+      local light_theme = {
+        normal = {
+          a = { bg = '#4a6da7', fg = '#ffffff', gui = 'bold' },  -- Soft blue
+          b = { bg = '#d8dee9', fg = '#3b4252' },                -- Light gray background, dark text
+          c = { bg = '#eceff4', fg = '#3b4252' }                 -- Lighter background
+        },
+        insert = {
+          a = { bg = '#5e8d87', fg = '#ffffff', gui = 'bold' },  -- Soft teal
+          b = { bg = '#d8dee9', fg = '#3b4252' },
+          c = { bg = '#eceff4', fg = '#3b4252' }
+        },
+        visual = {
+          a = { bg = '#8f6c93', fg = '#ffffff', gui = 'bold' },  -- Soft purple
+          b = { bg = '#d8dee9', fg = '#3b4252' },
+          c = { bg = '#eceff4', fg = '#3b4252' }
+        },
+        replace = {
+          a = { bg = '#a3636a', fg = '#ffffff', gui = 'bold' },  -- Soft red
+          b = { bg = '#d8dee9', fg = '#3b4252' },
+          c = { bg = '#eceff4', fg = '#3b4252' }
+        },
+        command = {
+          a = { bg = '#9a7a4d', fg = '#ffffff', gui = 'bold' },  -- Soft amber
+          b = { bg = '#d8dee9', fg = '#3b4252' },
+          c = { bg = '#eceff4', fg = '#3b4252' }
+        },
+        inactive = {
+          a = { bg = '#c0c0c0', fg = '#4c566a' },
+          b = { bg = '#e5e9f0', fg = '#4c566a' },
+          c = { bg = '#e5e9f0', fg = '#4c566a' }
+        }
+      }
+
+      require('lualine').setup({
+        options = {
+          theme = light_theme,
+          component_separators = { left = '│', right = '│' },  -- Simple separator
+          section_separators = { left = '', right = '' },      -- Borderless separator
+          globalstatus = true,
+        },
+        sections = {
+          lualine_a = { 'mode' },
+          lualine_b = {
+            { 'filename', color = { fg = '#2e3440', gui = 'bold' } },
+            { 'branch', icon = '', color = { fg = '#5e81ac' } }  -- Soft blue
+          },
+          lualine_c = {
+            { 'diff', 
+              colored = true,
+              diff_color = {
+                added    = { fg = '#5e8d87' },  -- Soft green
+                modified = { fg = '#9a7a4d' },  -- Soft yellow
+                removed  = { fg = '#a3636a' }   -- Soft red
+              }
+            }
+          },
+          lualine_x = {
+            { 'diagnostics',
+              sources = { 'nvim_diagnostic' },
+              symbols = { error = '✘ ', warn = '▲ ', info = 'ℹ ', hint = '⚑ ' },  -- More concise symbols
+              diagnostics_color = {
+                error = { fg = '#a3636a' },  -- Soft red
+                warn  = { fg = '#9a7a4d' },  -- Soft yellow
+                info  = { fg = '#5e81ac' },  -- Soft blue
+                hint  = { fg = '#5e8d87' }   -- Soft green
+              }
+            }
+          },
+          lualine_y = {
+            { 'filetype', icon_only = false, color = { fg = '#2e3440' } }
+          },
+          lualine_z = {
+            { 'progress', color = { fg = '#2e3440' } },
+            { 'location', color = { fg = '#2e3440' } }
+          }
+        }
+      })
     end
   },
 
