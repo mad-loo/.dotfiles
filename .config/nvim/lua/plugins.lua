@@ -20,8 +20,14 @@ require("lazy").setup({
     build = ":TSUpdate",
     config = function()
       require('nvim-treesitter.configs').setup({
-        ensure_installed = { "lua", "vim", "javascript", "typescript", "html", "css" },
+        ensure_installed = {
+          "lua",
+          "vim",
+          "javascript", "typescript", "html", "css",
+          "c", "cpp", "make", "cmake"
+        },
         highlight = { enable = true },
+        indent = { enable = true },
       })
     end
   },
@@ -79,7 +85,7 @@ require("lazy").setup({
             { 'branch', icon = '', color = { fg = '#5e81ac' } }  -- Soft blue
           },
           lualine_c = {
-            { 'diff', 
+            { 'diff',
               colored = true,
               diff_color = {
                 added    = { fg = '#5e8d87' },  -- Soft green
@@ -133,10 +139,10 @@ require("lazy").setup({
       vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<cr>')
     end
   },
-  
+
   -- EditorConfig support (reduces redundant configuration)
   'gpanders/editorconfig.nvim',
-  
+
   -- Auto-completion
   {
     'hrsh7th/nvim-cmp',
@@ -150,7 +156,7 @@ require("lazy").setup({
     config = function()
       local cmp = require('cmp')
       local luasnip = require('luasnip')
-      
+
       cmp.setup({
         snippet = {
           expand = function(args)
@@ -177,7 +183,7 @@ require("lazy").setup({
       })
     end
   },
-  
+
   -- LSP Support
   {
     'neovim/nvim-lspconfig',
@@ -188,17 +194,32 @@ require("lazy").setup({
     config = function()
       require('mason').setup()
       require('mason-lspconfig').setup({
-        ensure_installed = {}
+        ensure_installed = { "clangd" }
       })
-      
+
+      -- Configure clangd
+      require('lspconfig').clangd.setup{
+        cmd = {
+          "clangd",
+          "--background-index",
+          "--suggest-missing-includes",
+          "--clang-tidy",
+          "--header-insertion=iwyu",
+        }
+      }
+
       -- Basic key mappings for LSP functionality
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover)
       vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action)
       vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename)
+      -- C Support hotkeys
+      vim.keymap.set('n', '<leader>ci', vim.lsp.buf.implementation)
+      vim.keymap.set('n', '<leader>cr', vim.lsp.buf.references)
+      vim.keymap.set('n', '<leader>ct', vim.lsp.buf.type_definition)
     end
   },
-  
+
   -- Git integration
   {
     'lewis6991/gitsigns.nvim',
@@ -206,7 +227,7 @@ require("lazy").setup({
       require('gitsigns').setup()
     end
   },
-  
+
   -- Comment code easily
   {
     'numToStr/Comment.nvim',
@@ -214,4 +235,91 @@ require("lazy").setup({
       require('Comment').setup()
     end
   },
+
+  -- nvim autopairs
+  {
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",  -- Lazy loading to improve startup speed
+    config = function()
+      require('nvim-autopairs').setup({
+        check_ts = true,  -- Use treesitter to check context
+        disable_filetype = { "TelescopePrompt" },  -- Disable in specific file types
+        -- Quick wrapping of existing text
+        fast_wrap = {
+          map = '<M-e>',  -- Alt+e triggers quick wrapping
+          chars = { '{', '[', '(', '"', "'" },
+          pattern = [=[[%'%"%>%]%)%}%,]]=],
+          end_key = '$',
+          keys = 'qwertyuiopzxcvbnmasdfghjkl',
+          check_comma = true,
+        },
+      })
+
+      -- Integrate nvim-cmp
+      if package.loaded['cmp'] then
+        local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+        local cmp = require('cmp')
+        cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+      end
+    end
+  },
+
+  -- Formatter
+  {
+    'mhartington/formatter.nvim',
+    config = function()
+      require('formatter').setup({
+        filetype = {
+          c = {
+            function()
+              return {
+                exe = "clang-format",
+                args = {"--assume-filename", vim.api.nvim_buf_get_name(0)},
+                stdin = true
+              }
+            end
+          }
+        }
+      })
+      vim.keymap.set('n', '<leader>f', ':Format<CR>')
+    end
+  },
+
+  -- C Debugger Support LLDB
+  {
+    'mfussenegger/nvim-dap',
+    dependencies = {
+      'rcarriga/nvim-dap-ui',
+      'theHamsta/nvim-dap-virtual-text',
+    },
+    config = function()
+      -- Add Debugger configuration
+      local dap = require('dap')
+      dap.adapters.lldb = {
+        type = 'executable',
+        command = '/usr/bin/lldb-vscode',
+        name = 'lldb'
+      }
+      dap.configurations.c = {
+        {
+          name = "Launch",
+          type = "lldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          args = {},
+        },
+      }
+
+      vim.keymap.set('n', '<leader>db', require('dap').toggle_breakpoint)
+      vim.keymap.set('n', '<leader>dc', require('dap').continue)
+      vim.keymap.set('n', '<leader>ds', require('dap').step_over)
+      vim.keymap.set('n', '<leader>di', require('dap').step_into)
+      vim.keymap.set('n', '<leader>do', require('dap').step_out)
+    end
+  }
 })
+
